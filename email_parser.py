@@ -59,6 +59,10 @@ class Email:
     self.transaction_description : str = ""
     self.transaction_date_str : str = ""
     self.category : str = ""
+    self.price_usd : str = ""
+    self.price_crc : str = ""
+    self.card : str = ""
+    self.bank : str = ""
     
 
   @property
@@ -85,7 +89,8 @@ class Email:
 
   def set_category(self) -> None:
     description = " " + self.transaction_description.lower() + " "
-
+    description = description.replace("."," ").replace("*", " ").replace("-", " ")
+    description = description.replace("   "," ").replace("  "," ")
     for category, (include_words, exclude_words) in classification_list.items():
       excluded = False
       for word in exclude_words:
@@ -127,6 +132,7 @@ def parse_email(email : Email, bank : str)-> None:
 
 
 def parse_bcr(email : Email) -> None:
+  email.bank = "BCR"
   description = ""
   date = ""
   price = ""
@@ -155,6 +161,7 @@ def parse_bcr(email : Email) -> None:
 
 
 def parse_bac(email : Email) -> None:
+  email.bank = "BAC"
   text : str = email.body
   text = text.replace("\r","")
   while "\n\n" in text:
@@ -162,49 +169,56 @@ def parse_bac(email : Email) -> None:
     text = text.replace("\n\n\n","\n")
     text = text.replace("\n\n","\n")
 
-  DESCRIPTION_PATTERN = "Comercio:\n.*\n"
-  DATE_PATTERN = "Fecha:\n.*\n"
-  PRICE_PATTERN = "Monto:\n.*\n"
+  DESCRIPTION_PATTERN = "Comercio:\n(.*)\n"
+  DATE_PATTERN = "Fecha:\n(.*)\n"
+  PRICE_PATTERN = "Monto:\n(.*)\n"
+  CARD_PATTERN = r"\*(\d+)\nAutorizaci"
   description = ""
   date = ""
   price = ""
+  card = ""
   
   description_match = re.findall(DESCRIPTION_PATTERN, text)
   if description_match:
-    start = DESCRIPTION_PATTERN.index(".")
-    finish = DESCRIPTION_PATTERN.index("*") - len(DESCRIPTION_PATTERN) + 1
-    description = description_match[0][start:finish]
-    description = description.strip()
+    description = description_match[0].strip()
 
   date_match = re.findall(DATE_PATTERN, text)
   if date_match:
-    start = DATE_PATTERN.index(".")
-    finish = DATE_PATTERN.index("*") - len(DATE_PATTERN) + 1
-    date = date_match[0][start:finish]
-    date = date.strip()
+    date = date_match[0].strip()
 
   price_match = re.findall(PRICE_PATTERN, text)
   if price_match:
-    start = PRICE_PATTERN.index(".")
-    finish = PRICE_PATTERN.index("*") - len(PRICE_PATTERN) + 1
-    price = price_match[0][start:finish]
-    price = price.strip()
+    price = price_match[0].strip()
 
-  email.transaction_description, email.transaction_date_str, \
-          email.transaction_price_str = description, date, price
+  card_match =  re.findall(CARD_PATTERN, text)
+  if card_match:
+    card = card_match[0].strip()
+
+  if "USD" in price:
+    email.price_usd = price.replace("USD", "")
+  elif "CRC" in price:
+    email.price_crc = price.replace("CRC", "")
+
+  email.transaction_description = description 
+  email.transaction_date_str = date
+  email.transaction_price_str = price
+  email.card = card
   
   return
 
 def parse_scotiabank(email : Email) -> None:
+  email.bank = "Scotiabank"
   text : str = email.body
   text = text.replace("&nbsp", " ")
 
   DESCRIPTION_PATTERN = "Scotiabank le notifica que la transacción realizada en .*, el día"
   DATE_PATTERN = "el día .* a las"
-  PRICE_PATTERN = "referencia \d* por .*, fue "
+  PRICE_PATTERN = r"referencia \d* por .*, fue "
+  CARD_PATTERN = r"terminada en \d* "
   description = ""
   date = ""
   price = ""
+  card = ""
   
   description_match = re.findall(DESCRIPTION_PATTERN, text)
   if description_match:
@@ -217,6 +231,13 @@ def parse_scotiabank(email : Email) -> None:
     start = DATE_PATTERN.index(".")
     finish = DATE_PATTERN.index("*") - len(DATE_PATTERN) + 1
     date = date_match[0][start:finish]
+  
+  card_match = re.findall(CARD_PATTERN, text)
+  if card_match:
+    start = CARD_PATTERN.index(r"\d")
+    finish = len(CARD_PATTERN)
+    card = card_match[0][start:finish]
+    card = card.strip()
 
   price_match = re.findall(PRICE_PATTERN, text)
   if price_match:
@@ -226,8 +247,14 @@ def parse_scotiabank(email : Email) -> None:
     finish = PRICE_PATTERN.index("*") - len(PRICE_PATTERN) + 1
     price = price_match[0][start:finish]
 
+  if "USD" in price:
+    email.price_usd = price.replace("USD", "")
+  elif "CRC" in price:
+    email.price_crc = price.replace("CRC", "")
+
   email.transaction_description, email.transaction_date_str, \
           email.transaction_price_str = description, date, price
+  email.card = card
   
   return 
 

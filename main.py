@@ -11,6 +11,7 @@ import base64
 from bs4 import BeautifulSoup
 import re
 import csv
+import time
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
@@ -38,7 +39,7 @@ def set_options() -> tuple[int,str]:
 
 def export_emails_to_csv(email_list : list[Email]) -> None:
   print("Exporting", len(email_list), "transaction emails")
-  headers = ["Date", "Description", "Category", "Price"]
+  headers = ["Date", "Description", "Category", "Price", "Price USD", "Price CRC", "Bank", "Card"]
   if email_list == []:
     print("No data to export")
     return
@@ -46,7 +47,14 @@ def export_emails_to_csv(email_list : list[Email]) -> None:
     csv_writer = csv.writer(f)
     csv_writer.writerow(headers)
     for email in email_list:
-      temp_row = [email.date, email.transaction_description, email.category, email.transaction_price_str]
+      temp_row = [email.date, \
+                  email.transaction_description, \
+                  email.category, \
+                  email.transaction_price_str, \
+                  email.price_usd, \
+                  email.price_crc, \
+                  email.bank, \
+                  email.card]
       csv_writer.writerow(temp_row)
   
   print("Finished exporting!\n")
@@ -66,7 +74,7 @@ def define_options() -> tuple[int,str]:
 
   print("\nPlease input the search query to use." \
         "\nTake into consideration that the search by date uses the timezone of UTC" \
-        "\nExample: 'label:Bancos from:amy@example.com  after:2020/04/16'" \
+        "\nExample: 'label:Bancos from:AlertasScotiabank@scotiabank.com  after:2024/04/16'" \
         "\n - Bank emails: notificacion@notificacionesbaccr.com , AlertasScotiabank@scotiabank.com , bcrtarjestcta@bancobcr.com" \
         "\n\nCheck https://support.google.com/mail/answer/7190?hl=en on how to make a search query." \
       )
@@ -83,14 +91,11 @@ def main():
     creds = Credentials.from_authorized_user_file("token.json", SCOPES)
   # If there are no (valid) credentials available, let the user log in.
   if not creds or not creds.valid:
-    if creds and creds.expired and creds.refresh_token:
-      os.remove("token.json")
-      creds.refresh(Request())
-    else:
-      flow = InstalledAppFlow.from_client_secrets_file(
-          "credentials.json", SCOPES
-      )
-      creds = flow.run_local_server(port=0)
+    os.remove("token.json")
+    flow = InstalledAppFlow.from_client_secrets_file(
+        "credentials.json", SCOPES
+    )
+    creds = flow.run_local_server(port=0)
     # Save the credentials for the next run
     with open("token.json", "w") as token:
       token.write(creds.to_json())
@@ -143,7 +148,7 @@ def main():
           
 
         decoded_body = base64.urlsafe_b64decode(encoded_body.encode('UTF-8'))
-        current_email.html_body = BeautifulSoup(decoded_body, "lxml")
+        current_email.html_body = BeautifulSoup(decoded_body, "html.parser")
         current_email.body = current_email.html_body.text
         current_email.body = current_email.body.replace("&nbsp","\n")
       except: 
@@ -170,6 +175,15 @@ def main():
     print(f"An error occurred: {error}")
 
 
+def countdown(n : int):
+  for i in range(n,0,-1):
+    print("Closing in", i, end="\r")
+    time.sleep(1) 
+
 if __name__ == "__main__":
-  read_classification()
-  main()
+  try:
+    read_classification()
+    main()
+  except Exception as e:
+    print("Fatal error detected!\n\n", e)
+  countdown(5)
