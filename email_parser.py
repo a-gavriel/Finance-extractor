@@ -59,9 +59,9 @@ class Email:
     self.transaction_description : str = ""
     self.transaction_date_str : str = ""
     self.category : str = ""
-    self.price_usd : str = ""
-    self.price_crc : str = ""
-    self.card : str = ""
+    self.price_usd : float = 0.0
+    self.price_crc : float = 0.0
+    self.card : int = 0
     self.bank : str = ""
     
 
@@ -150,12 +150,15 @@ def parse_bcr(email : Email) -> None:
   approved = html_position.text
 
   if currency == "COLON COSTA RICA":
+    email.price_crc = to_price(amount)
     price = "CRC " + amount
   elif currency == 'US DOLLAR':
+    email.price_usd = to_price(amount)
     price = "USD " + amount
-  
-  email.transaction_description, email.transaction_date_str, \
-          email.transaction_price_str = description, date, price
+
+  email.transaction_price_str = price
+  email.transaction_description = description 
+  email.transaction_date_str = date
   
   return
 
@@ -193,16 +196,18 @@ def parse_bac(email : Email) -> None:
   card_match =  re.findall(CARD_PATTERN, text)
   if card_match:
     card = card_match[0].strip()
+    email.card = int(card)
 
   if "USD" in price:
-    email.price_usd = price.replace("USD", "")
+    val = price.replace("USD", "")
+    email.price_usd = to_price(val)
   elif "CRC" in price:
-    email.price_crc = price.replace("CRC", "")
+    val = price.replace("CRC", "")
+    email.price_crc = to_price(val)
 
   email.transaction_description = description 
   email.transaction_date_str = date
   email.transaction_price_str = price
-  email.card = card
   
   return
 
@@ -212,9 +217,9 @@ def parse_scotiabank(email : Email) -> None:
   text = text.replace("&nbsp", " ")
 
   DESCRIPTION_PATTERN = "Scotiabank le notifica que la transacción realizada en .*, el día"
-  DATE_PATTERN = "el día .* a las"
-  PRICE_PATTERN = r"referencia \d* por .*, fue "
-  CARD_PATTERN = r"terminada en \d* "
+  DATE_PATTERN = r"el día (.*) a las"
+  PRICE_PATTERN = r"referencia \d* por (.*), fue "
+  CARD_PATTERN = r"terminada en (\d*) "
   description = ""
   date = ""
   price = ""
@@ -228,34 +233,47 @@ def parse_scotiabank(email : Email) -> None:
   
   date_match = re.findall(DATE_PATTERN, text)
   if date_match:
-    start = DATE_PATTERN.index(".")
-    finish = DATE_PATTERN.index("*") - len(DATE_PATTERN) + 1
-    date = date_match[0][start:finish]
+    date = date_match[0]
   
   card_match = re.findall(CARD_PATTERN, text)
   if card_match:
-    start = CARD_PATTERN.index(r"\d")
-    finish = len(CARD_PATTERN)
-    card = card_match[0][start:finish]
-    card = card.strip()
+    card = card_match[0]
+    email.card = int(card)
 
   price_match = re.findall(PRICE_PATTERN, text)
   if price_match:
-    PRICE_PATTERN = " por .*, fue "
-    price_match = re.findall(PRICE_PATTERN, price_match[0])
-    start = PRICE_PATTERN.index(".")
-    finish = PRICE_PATTERN.index("*") - len(PRICE_PATTERN) + 1
-    price = price_match[0][start:finish]
+    price = price_match[0]
 
   if "USD" in price:
-    email.price_usd = price.replace("USD", "")
+    val = price.replace("USD", "")
+    email.price_usd = to_price(val)
   elif "CRC" in price:
-    email.price_crc = price.replace("CRC", "")
+    val = price.replace("CRC", "")
+    email.price_crc = to_price(val)
 
   email.transaction_description, email.transaction_date_str, \
           email.transaction_price_str = description, date, price
-  email.card = card
   
   return 
 
 
+def to_price(number : str) -> float:
+  number = number.strip()
+  if not number:
+    return 0.0
+  
+  has_period = "." in number
+  has_comma = "," in number
+  if has_period:
+    pos_p = number.index(".")
+  if has_comma:
+    pos_c = number.index(",")
+  if has_comma and has_period:
+    if pos_p < pos_c:
+      number = number.replace(".","")
+    else:
+      number = number.replace(",","")
+  
+  number = number.replace(",",".")
+  val = float(number)
+  return val

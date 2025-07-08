@@ -7,11 +7,11 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from email_parser import *
+from exporter import *
 import base64
 from bs4 import BeautifulSoup
-import re
-import csv
 import time
+import traceback
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
@@ -36,29 +36,6 @@ def set_options() -> tuple[int,str]:
       break
   
   return result
-
-def export_emails_to_csv(email_list : list[Email]) -> None:
-  print("Exporting", len(email_list), "transaction emails")
-  headers = ["Date", "Description", "Category", "Price", "Price USD", "Price CRC", "Bank", "Card"]
-  if email_list == []:
-    print("No data to export")
-    return
-  with open('Emails_output.csv', 'w', newline='', encoding='utf-8') as f:
-    csv_writer = csv.writer(f)
-    csv_writer.writerow(headers)
-    for email in email_list:
-      temp_row = [email.date, \
-                  email.transaction_description, \
-                  email.category, \
-                  email.transaction_price_str, \
-                  email.price_usd, \
-                  email.price_crc, \
-                  email.bank, \
-                  email.card]
-      csv_writer.writerow(temp_row)
-  
-  print("Finished exporting!\n")
-  return
 
 def define_options() -> tuple[int,str]:
   max_results : int = 100
@@ -168,7 +145,7 @@ def main():
           emails_to_export.append(current_email)
 
     print(f"Finished parsing {messages_len} emails\n")
-    export_emails_to_csv(emails_to_export)
+    export_emails_to_xlsx(emails_to_export)
 
   except HttpError as error:
     # TODO(developer) - Handle errors from gmail API.
@@ -185,5 +162,6 @@ if __name__ == "__main__":
     read_classification()
     main()
   except Exception as e:
-    print("Fatal error detected!\n\n", e)
+    print(traceback.format_exc())
+    #print("Fatal error detected!\n\n", e)
   countdown(5)
