@@ -1,14 +1,36 @@
-# Example 1
-class: A
-include: walmart, pali, auto mercado
+# Compras de super
+class: Groceries
+include: walmart, pali, auto mercado, MASXMENOS, minisuper, mini super, verduleria, carniceria, fresh market, mega super, pequeno mundo, am pm, mas x menos, maxipali  , mayca , delimart , price smart, mxm guachipelin, supermercado, construplaza, MXM, AMPM, EPA, GESSA
 exclude: 
 
 # Example 2
-class: B
-include: food
+class: Amazon
+include: Amzn.com/bill, AMZN 
 exclude: 
 
-# Example 3
-class: 
-include: test
+# Comidas afuera
+class: Restaurant
+include: mc donald, pops, subway, BK, papa johns, kfc, crispy wings, donde manuelito, coral, sabores de nuestra, dos chingones, mc donalds, rice n smile, expendomax, ta bueno , sabores heredia , musmanni , don rufino , los barril , sushi , soda tapia, spoon , super lisa , natsumi, restaurante, la combi, sabores mi tierra, la tortilleria, posada bruja, kololo, chocolatin, panaderia, pf chang , cosi , didi food, krispy kreme, il contadino, panavieja, papa john, pizza hut
+exclude: 
+
+# Transporte
+class: Transportation
+include: servicentro, parquimetros, parqueo, uber rides, fill n go , aros y llantas , estacion de servicio, rides, parking, favorita
+exclude: 
+
+# Salud y anteojos
+class: Medical
+include: FARMACIA , hospital , fischel, farmavalue, medicentro
+exclude: 
+
+# Ropa y deporte
+class: Personal
+include: world gym
+exclude: 
+
+
+
+# Luz / agua / seguros
+class: Utilities
+include: seguro fraude
 exclude: 
