@@ -8,16 +8,28 @@ from googleapiclient.errors import HttpError
 
 from email_parser import *
 from exporter import *
+from select_calendar import select_date
 import base64
 from bs4 import BeautifulSoup
 import time
 import traceback
+import sys
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
 
-def set_options() -> tuple[int,str]:
+def set_options(use_default_options: bool) -> tuple[int,str]:
+  # Default options are:
+  #       results: 300
+  #       query: "label:Bancos after:YYYY/MM/DD"
+  if use_default_options:
+    selected_date = []
+    select_date(selected_date)
+    if selected_date:
+      result = 300, f"label:Bancos after:{selected_date[0]}"
+      return result
+
   # Here we define the default value for the options
   result = (0, "")
 
@@ -60,6 +72,11 @@ def define_options() -> tuple[int,str]:
   return (max_results, query)
 
 def main():
+  use_default_options = 0
+  if len(sys.argv) == 2:
+    if sys.argv[1] == "-q":
+      use_default_options = 1
+
   emails_to_export : list[Email] = []
   creds = None
   # The file token.json stores the user's access and refresh tokens, and is
@@ -68,7 +85,8 @@ def main():
     creds = Credentials.from_authorized_user_file("token.json", SCOPES)
   # If there are no (valid) credentials available, let the user log in.
   if not creds or not creds.valid:
-    os.remove("token.json")
+    if os.path.exists("token.json"):
+      os.remove("token.json")
     flow = InstalledAppFlow.from_client_secrets_file(
         "credentials.json", SCOPES
     )
@@ -82,7 +100,7 @@ def main():
     service = build("gmail", "v1", credentials=creds)
     
     # request a list of all the messages 
-    max_emails, search_query = set_options()
+    max_emails, search_query = set_options(use_default_options)
     result = service.users().messages().list(maxResults=max_emails, userId='me', q=search_query).execute() 
     messages = result.get('messages') 
     messages_len = len(messages)
