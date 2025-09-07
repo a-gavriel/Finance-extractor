@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from enum import Enum
 
 classification_list = {}
 
@@ -48,6 +49,13 @@ def read_classification():
 
   return
 
+class Bank(Enum):
+  UNASSIGNED = 0
+  SCOTIABANK = 1
+  BAC = 2
+  BCR = 3
+  BNCR = 4
+
 class Email:
   def __init__(self):
     self.sender : str = ""
@@ -62,7 +70,7 @@ class Email:
     self.price_usd : float = 0.0
     self.price_crc : float = 0.0
     self.card : int = 0
-    self.bank : str = ""
+    self.bank : Bank = Bank.UNASSIGNED
     
 
   @property
@@ -109,7 +117,16 @@ class Email:
     self.category = ""
     return
 
-def parse_email(email : Email, bank : str)-> None:
+def indentify_bank(email: Email) -> Bank:
+  if ("scotiabank" in email.sender.lower()) and ("alerta transacción tarjeta" in email.subject.lower()):
+    return Bank.SCOTIABANK
+  elif ("notificacionesbaccr" in email.sender.lower()) and ("notificación de transacción" in email.subject.lower()):
+    return Bank.BAC
+  elif ("bcrtarjestcta" in email.sender.lower()) and ("notificación de transacciones" in email.subject.lower()):
+    return Bank.BCR
+  return Bank.UNASSIGNED
+
+def parse_email(email : Email, bank: Bank = Bank.UNASSIGNED)-> None:
   """
   Reads the email's body and sets its transaction's:
     description  : str
@@ -117,14 +134,17 @@ def parse_email(email : Email, bank : str)-> None:
     price : str
     category : str
   """
-  if bank == "scotiabank":
+  if bank == Bank.UNASSIGNED:
+    bank = indentify_bank(email)
+
+  if bank == Bank.SCOTIABANK:
     parse_scotiabank(email)
-  elif bank == "bac":
+  elif bank == Bank.BAC:
     parse_bac(email)
-  elif bank == "bcr":
+  elif bank == Bank.BCR:
     parse_bcr(email)
   else:
-    raise Exception("Error bank parser not found")
+    raise Exception(f"Error: Bank parser not defined for {bank}")
   
   email.set_category()
   return 
@@ -132,7 +152,7 @@ def parse_email(email : Email, bank : str)-> None:
 
 
 def parse_bcr(email : Email) -> None:
-  email.bank = "BCR"
+  email.bank = Bank.BCR
   description = ""
   date = ""
   price = ""
@@ -164,7 +184,7 @@ def parse_bcr(email : Email) -> None:
 
 
 def parse_bac(email : Email) -> None:
-  email.bank = "BAC"
+  email.bank = Bank.BAC
   text : str = email.body
   text = text.replace("\r","")
   while "\n\n" in text:
@@ -212,11 +232,11 @@ def parse_bac(email : Email) -> None:
   return
 
 def parse_scotiabank(email : Email) -> None:
-  email.bank = "Scotiabank"
+  email.bank = Bank.SCOTIABANK
   text : str = email.body
   text = text.replace("&nbsp", " ")
 
-  DESCRIPTION_PATTERN = "Scotiabank le notifica que la transacción realizada en .*, el día"
+  DESCRIPTION_PATTERN = r"Scotiabank le notifica que la transacción realizada en (.*), el día"
   DATE_PATTERN = r"el día (.*) a las"
   PRICE_PATTERN = r"referencia \d* por (.*), fue "
   CARD_PATTERN = r"terminada en (\d*) "
@@ -227,9 +247,7 @@ def parse_scotiabank(email : Email) -> None:
   
   description_match = re.findall(DESCRIPTION_PATTERN, text)
   if description_match:
-    start = DESCRIPTION_PATTERN.index(".")
-    finish = DESCRIPTION_PATTERN.index("*") - len(DESCRIPTION_PATTERN) + 1
-    description = description_match[0][start:finish]
+    description = description_match[0]
   
   date_match = re.findall(DATE_PATTERN, text)
   if date_match:

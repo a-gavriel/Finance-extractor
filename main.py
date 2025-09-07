@@ -16,7 +16,7 @@ import traceback
 import sys
 
 # If modifying these scopes, delete the file token.json.
-SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
+SCOPES = ["https://www.googleapis.com/auth/gmail.modify", "https://www.googleapis.com/auth/gmail.labels"]
 
 
 def set_options(use_default_options: bool) -> tuple[int,str]:
@@ -28,6 +28,7 @@ def set_options(use_default_options: bool) -> tuple[int,str]:
     select_date(selected_date)
     if selected_date:
       result = 300, f"label:Bancos after:{selected_date[0]}"
+      print(f"Search Query:\n - limit={result[0]}\n - query={result[1]}")
       return result
 
   # Here we define the default value for the options
@@ -149,18 +150,12 @@ def main():
       except: 
         pass
       finally:
-        append = True
-        if ("scotiabank" in current_email.sender.lower()) and ("alerta transacción tarjeta" in current_email.subject.lower()):
-          parse_email(current_email, "scotiabank")
-        elif ("notificacionesbaccr" in current_email.sender.lower()) and ("notificación de transacción" in current_email.subject.lower()):
-          parse_email(current_email, "bac")
-        elif ("bcrtarjestcta" in current_email.sender.lower()) and ("notificación de transacciones" in current_email.subject.lower()):
-          parse_email(current_email, "bcr")
-        else:
-          append = False
-
-        if append:
+        try:
+          parse_email(current_email)
+          service.users().messages().modify(userId='me', id=msg['id'], body={'removeLabelIds': ['UNREAD']}).execute()
           emails_to_export.append(current_email)
+        except Exception as e:
+          print(f"Error parsing email. Skiping email: {current_email}. Error: {e}")
 
     print(f"Finished parsing {messages_len} emails\n")
     export_emails_to_xlsx(emails_to_export)

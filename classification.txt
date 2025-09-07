@@ -1,6 +1,6 @@
 # Compras de super
 class: Groceries
-include: walmart, pali, auto mercado, MASXMENOS, minisuper, mini super, verduleria, carniceria, fresh market, mega super, pequeno mundo, am pm, mas x menos, maxipali  , mayca , delimart , price smart, mxm guachipelin, supermercado, construplaza, MXM, AMPM, EPA, GESSA
+include: walmart, pali, auto mercado, MASXMENOS, minisuper, mini super, verduleria, carniceria, fresh market, mega super, pequeno mundo, am pm, mas x menos, maxipali  , mayca , delimart , price smart, mxm guachipelin, supermercado, construplaza, MXM, AMPM, EPA, GESSA, verduras, am pm, super economico
 exclude: 
 
 # Example 2
@@ -10,25 +10,28 @@ exclude:
 
 # Comidas afuera
 class: Restaurant
-include: mc donald, pops, subway, BK, papa johns, kfc, crispy wings, donde manuelito, coral, sabores de nuestra, dos chingones, mc donalds, rice n smile, expendomax, ta bueno , sabores heredia , musmanni , don rufino , los barril , sushi , soda tapia, spoon , super lisa , natsumi, restaurante, la combi, sabores mi tierra, la tortilleria, posada bruja, kololo, chocolatin, panaderia, pf chang , cosi , didi food, krispy kreme, il contadino, panavieja, papa john, pizza hut
+include: mc donald, pops, subway, BK, papa johns, kfc, crispy wings, donde manuelito, coral, sabores de nuestra, dos chingones, mc donalds, rice n smile, expendomax, ta bueno , sabores heredia , musmanni , don rufino , los barril , sushi , soda tapia, spoon , super lisa , natsumi, restaurante, la combi, sabores mi tierra, la tortilleria, posada bruja, kololo, chocolatin, panaderia, pf chang , cosi , didi food, krispy kreme, il contadino, panavieja, papa john, pizza hut, skadi, monchis, soda santo tomas, pollo granjero, muelle 21, crispy churros, taco bell, reposteria, helado
 exclude: 
 
 # Transporte
 class: Transportation
-include: servicentro, parquimetros, parqueo, uber rides, fill n go , aros y llantas , estacion de servicio, rides, parking, favorita
+include: servicentro, parquimetros, parqueo, uber rides, fill n go , aros y llantas , estacion de servicio, rides, parking, favorita, muni park, dekra, pending uber com, parqueos
 exclude: 
 
 # Salud y anteojos
 class: Medical
-include: FARMACIA , hospital , fischel, farmavalue, medicentro
+include: FARMACIA , hospital , fischel, farmavalue, medicentro, echandi, farmacias la bomba
 exclude: 
 
 # Ropa y deporte
 class: Personal
-include: world gym
+include: world gym , gold's gym
 exclude: 
 
-
+# Fun
+class: Fun
+include: top outlet, avianca, netflix , el rey, cinepolis
+exclude:
 
 # Luz / agua / seguros
 class: Utilities

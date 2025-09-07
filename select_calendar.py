@@ -22,7 +22,7 @@ def select_date(value_as_list : list) -> None:
         return
 
     # Add Button and Label
-    Button(root, text = "Get Date",
+    Button(root, text = "Select starting date",
         command = grad_date).pack()
 
     date = Label(root, text = "")
