@@ -27,7 +27,7 @@ def set_options(use_default_options: bool) -> tuple[int,str]:
     selected_date = []
     select_date(selected_date)
     if selected_date:
-      result = 300, f"label:Bancos after:{selected_date[0]}"
+      result = 300, f"label:Bancos after:{selected_date[0]}  before:{selected_date[1]}"
       print(f"Search Query:\n - limit={result[0]}\n - query={result[1]}")
       return result
 

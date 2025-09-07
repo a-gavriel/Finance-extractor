@@ -49,7 +49,7 @@ def export_emails_to_xlsx(email_list : list[Email]) -> None:
                   email.transaction_price_str, \
                   email.price_usd, \
                   email.price_crc, \
-                  email.bank, \
+                  str(email.bank), \
                   email.card ]
       for j,val in enumerate(temp_row):
         ws.write(i+1,j, val)

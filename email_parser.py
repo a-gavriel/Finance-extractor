@@ -55,6 +55,18 @@ class Bank(Enum):
   BAC = 2
   BCR = 3
   BNCR = 4
+  def __repr__(self) -> str:
+    name = self.name
+    if len(name) > 5:
+      return name.title()
+    else:
+      return name.upper()
+  def __str__(self) -> str:
+    name = self.name
+    if len(name) > 5:
+      return name.title()
+    else:
+      return name.upper()
 
 class Email:
   def __init__(self):
