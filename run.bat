@@ -28,6 +28,6 @@ if errorlevel 1 (
 
 :: Run main.py
 echo [INFO] Running main.py...
-python main.py -q
+python main.py -g
 
 endlocal
