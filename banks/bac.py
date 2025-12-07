@@ -29,19 +29,48 @@ class BacProcessor(BaseBankProcessor):
         DATETIME_PATTERN =  r"Fecha:\s*\n?\s*([A-Za-z]{3} \d{1,2}, \d{4}, \d{1,2}:\d{2})"
         dt = BaseBankProcessor.get_default_date_time(email_dt_str)
 
-        datetime_match = re.search(DATETIME_PATTERN, text)
-        if datetime_match:
-            date_str = datetime_match.group(1)
-            date_str = date_str.replace(",", "")
-            dt = datetime.strptime(date_str, "%b %d %Y %H:%M")
-            return dt
+        month_map = {
+            "Ene": "Jan",
+            "Feb": "Feb",
+            "Mar": "Mar",
+            "Abr": "Apr",
+            "May": "May",
+            "Jun": "Jun",
+            "Jul": "Jul",
+            "Ago": "Aug",
+            "Sep": "Sep",
+            "Oct": "Oct",
+            "Nov": "Nov",
+            "Dic": "Dec",
+        }
 
-        date_match = re.search(DATE_PATTERN, text)
-        if date_match:
-            date_str = date_match.group(1)
-            date_str = date_str.replace(",", "")
-            dt = datetime.strptime(date_str, "%b %d %Y")
-            return dt
+
+        try:
+            datetime_match = re.search(DATETIME_PATTERN, text)
+            if datetime_match:
+                date_str = datetime_match.group(1)
+                date_str = date_str.replace(",", "")
+
+                # Convert month to spanish
+                parts = date_str.split()
+                parts[0] = month_map[parts[0]]
+                date_str_eng = " ".join(parts)
+                dt = datetime.strptime(date_str_eng, "%b %d %Y %H:%M")
+                return dt
+
+            date_match = re.search(DATE_PATTERN, text)
+            if date_match:
+                date_str = date_match.group(1)
+                date_str = date_str.replace(",", "")
+
+                # Convert month to spanish
+                parts = date_str.split()
+                parts[0] = month_map[parts[0]]
+                date_str_eng = " ".join(parts)
+                dt = datetime.strptime(date_str, "%b %d %Y")
+                return dt
+        except Exception as e:
+            print(e)
 
         return dt
 

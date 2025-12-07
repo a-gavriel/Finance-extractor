@@ -5,6 +5,7 @@ from datetime import datetime
 
 class TransactionType(Enum):
     CARD_MOVEMENT = "card_movement"
+    SINPE_MOVIL = "sinpe_movil"
     ATM_WITHDRAWAL = "atm_withdrawal"
     TRANSFER = "transfer"
     DEPOSIT = "deposit"

@@ -29,17 +29,20 @@ class ScotiabankProcessor(BaseBankProcessor):
         DATETIME_PATTERN = r"el día (\d{2}/\d{2}/\d{4}) a las (\d{1,2}:\d{2} [AP]M)"
         dt = BaseBankProcessor.get_default_date_time(email_dt_str)
 
-        date_time_match = re.search(DATETIME_PATTERN, text)
-        if date_time_match:
-            date_str, time_str = date_time_match.groups()
-            full_str = f"{date_str} {time_str}"
-            dt = datetime.strptime(full_str, "%d/%m/%Y %I:%M %p")
-            return dt
+        try:
+            date_time_match = re.search(DATETIME_PATTERN, text)
+            if date_time_match:
+                date_str, time_str = date_time_match.groups()
+                full_str = f"{date_str} {time_str}"
+                dt = datetime.strptime(full_str, "%d/%m/%Y %I:%M %p")
+                return dt
 
-        date_match = re.findall(DATE_PATTERN, text)
-        if date_match:
-            dt = datetime.strptime(date_match[0], "%d/%m/%Y")
-            return dt
+            date_match = re.findall(DATE_PATTERN, text)
+            if date_match:
+                dt = datetime.strptime(date_match[0], "%d/%m/%Y")
+                return dt
+        except Exception as e:
+            print(e)
 
         return dt
 
@@ -50,7 +53,7 @@ class ScotiabankProcessor(BaseBankProcessor):
         text = text.replace("&nbsp", " ")
 
         DESCRIPTION_PATTERN = (
-            r"Scotiabank le notifica que la transacción realizada en (.*), el día"
+            r"le notifica que la transacción realizada en (.*), el día"
         )
         PRICE_PATTERN = r"referencia \d* por (.*), fue "
         CARD_PATTERN = r"terminada en (\d*) "

@@ -83,7 +83,7 @@ def define_query(operation_mode: int) -> tuple[int, str]:
         #       query: "label:Bancos after:YYYY/MM/DD"
         print("Using Script in DEV mode")
         today = datetime.today()
-        start_date = today - timedelta(days=10)
+        start_date = today - timedelta(days=30)
         start_date_str = start_date.strftime(DATETIME_FORMATER)
         result = 300, f"label:Bancos after:{start_date_str}"
         print(f"Search Query:\n - limit={result[0]}\n - query={result[1]}")
@@ -99,7 +99,7 @@ def define_query_manually() -> tuple[int, str]:
         try:
             max_results = int(input("Max results [max=500]:").strip())
             if max_results < 1 or max_results > 500:
-                raise Exception("Must be between 1 and 500")
+                raise ValueError("Must be between 1 and 500")
             else:
                 break
         except Exception:

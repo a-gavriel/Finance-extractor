@@ -12,22 +12,20 @@ class BaseBankProcessor(ABC):
     @abstractmethod
     def name(self) -> str:
         """Readable name of the bank (e.g., 'Scotiabank')"""
-        pass
 
     @abstractmethod
     def identify(self, email: Email) -> bool:
         """Returns True if the email belongs to this bank."""
-        pass
 
     @abstractmethod
     def process(self, email: Email) -> Transaction | None:
         """Parses the email and returns a Transaction if applicable."""
-        pass
 
     @staticmethod
     def to_price(raw_price : str) -> float:
         """
-        Converts from a raw price number which may use a decimal separator of comma or point into a float
+        Converts from a raw price number which may use a decimal separator
+        of comma or dot into a float
         """
         number = raw_price.strip()
         if not number:
