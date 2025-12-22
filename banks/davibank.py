@@ -6,13 +6,13 @@ from models.transaction import Transaction, TransactionType
 from models.email import Email
 
 
-class ScotiabankProcessor(BaseBankProcessor):
+class DavibankProcessor(BaseBankProcessor):
     @property
     def name(self) -> str:
-        return "Scotiabank"
+        return "Davibank"
 
     def identify(self, email: Email):
-        return "scotiabank" in email.sender.lower()
+        return "davibank" in email.sender.lower()
 
     def process(self, email):
         if self._identify_transaction_type(email) == TransactionType.CARD_MOVEMENT:
@@ -60,7 +60,7 @@ class ScotiabankProcessor(BaseBankProcessor):
         description = ""
         amount_raw = ""
         card = ""
-        dt: "datetime" = ScotiabankProcessor._get_datetime(text, email.date_str)
+        dt: "datetime" = DavibankProcessor._get_datetime(text, email.date_str)
 
         description_match = re.findall(DESCRIPTION_PATTERN, text)
         if description_match:

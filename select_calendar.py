@@ -10,6 +10,8 @@ DATETIME_FORMATER= "%Y/%m/%d"
 def select_date(value_as_list : list, as_lib = True) -> None:
 
     root = Tk()
+    root.attributes('-topmost', 1)
+    root.attributes('-topmost', 0)
     today = datetime.today()
     end_date = today + timedelta(days=1)
     end_date_str = end_date.strftime(DATETIME_FORMATER)
