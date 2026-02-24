@@ -42,6 +42,8 @@ class DavibankProcessor(BaseBankProcessor):
                 dt = datetime.strptime(date_match[0], "%d/%m/%Y")
                 return dt
         except Exception as e:
+            print("Error parsing datetime of Davibank email. Args: \n"
+                  f"text: {text}, email_dt_str: {email_dt_str}")
             print(e)
 
         return dt

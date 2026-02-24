@@ -32,7 +32,7 @@ class BcrProcessor(BaseBankProcessor):
 
     @staticmethod
     def _get_datetime(text: str, email_dt_str) -> "datetime":
-        DATETIME_PATTERN = r"(\d{2}/\d{2}/\d{4}) (\d{1,2}:\d{2}):\d{2}"
+        DATETIME_PATTERN = r"(\d{2}/\d{2}/\d{4}) (\d{1,2}:\d{2})"
         dt = BaseBankProcessor.get_default_date_time(email_dt_str)
 
         try:
@@ -40,9 +40,11 @@ class BcrProcessor(BaseBankProcessor):
             if date_time_match:
                 date_str, time_str = date_time_match.groups()
                 full_str = f"{date_str} {time_str}"
-                dt = datetime.strptime(full_str, "%d/%m/%Y %H:%M:%S")
+                dt = datetime.strptime(full_str, "%d/%m/%Y %H:%M")
                 return dt
         except Exception as e:
+            print("Error parsing datetime of BCR email. Args: \n"
+                  f"text: {text}, email_dt_str: {email_dt_str}")
             print(e)
         return dt
 
@@ -103,9 +105,9 @@ class BcrProcessor(BaseBankProcessor):
         description = html_position.text
         # Go to column 7
         html_position = html_position.findNext("td")
-        _approved = html_position.text
-
+        approved = (html_position.text != "Negada")
         price_crc, price_usd = 0.0, 0.0
+
 
         if currency == "COLON COSTA RICA":
             price_crc = BaseBankProcessor.to_price(amount)
@@ -113,6 +115,9 @@ class BcrProcessor(BaseBankProcessor):
         elif currency == "US DOLLAR":
             price_usd = BaseBankProcessor.to_price(amount)
             price = "USD " + amount
+
+        if not approved:
+            price_crc, price_usd = 0.0, 0.0
 
         ts = Transaction(
             type=TransactionType.CARD_MOVEMENT,
@@ -126,6 +131,3 @@ class BcrProcessor(BaseBankProcessor):
         )
         ts.set_category()
         return ts
-
-
-## TODO: Add sinpe movil

@@ -70,6 +70,8 @@ class BacProcessor(BaseBankProcessor):
                 dt = datetime.strptime(date_str, "%b %d %Y")
                 return dt
         except Exception as e:
+            print("Error parsing datetime of BAC email. Args: \n"
+                  f"text: {text}, email_dt_str: {email_dt_str}")
             print(e)
 
         return dt
