@@ -1,7 +1,7 @@
 from enum import Enum
 from dataclasses import dataclass
 from datetime import datetime
-
+from lib.categorizer import categorize_transaction
 
 class TransactionType(Enum):
     CARD_MOVEMENT = "card_movement"
@@ -10,54 +10,6 @@ class TransactionType(Enum):
     TRANSFER = "transfer"
     DEPOSIT = "deposit"
 
-
-classification_list = {}
-
-
-def read_classification():
-    global classification_list
-    with open("classification.txt", "r") as f:
-        lines = f.readlines()
-
-    current_class = ""
-    for line in lines:
-        line = line.strip().lower().replace("\n", "")
-        if len(line) == 0:
-            pass
-        elif line[0] == "#":
-            pass
-        elif line.startswith("class:"):
-            current_class = f"temp{len(classification_list)+1}"
-            if len(line) > 6:
-                line = line[6:].strip()
-                if (len(line) != 0) and (line not in classification_list):
-                    current_class = line.title()
-
-            classification_list[current_class] = [[], []]
-
-        elif line.startswith("include:"):
-            include_list = []
-            if len(line) > 8:
-                line = line[8:].strip()
-                if len(line) != 0:
-                    include_list = line.split(",")
-                    include_list = [i.strip() for i in include_list]
-
-            classification_list[current_class][0].extend(include_list)
-
-        elif line.startswith("exclude:"):
-            exclude_list = []
-            if len(line) > 8:
-                line = line[8:].strip()
-                if len(line) != 0:
-                    exclude_list = line.split(",")
-                    exclude_list = [i.strip() for i in exclude_list]
-
-            classification_list[current_class][1].extend(exclude_list)
-        else:
-            pass
-
-    return
 
 
 @dataclass
@@ -90,27 +42,5 @@ class Transaction:
 
 
     def set_category(self) -> None:
-        description = " " + self.description.lower() + " "
-        description = description.replace(".", " ").replace("*", " ").replace("-", " ")
-        description = description.replace("   ", " ").replace("  ", " ")
-        for category, (include_words, exclude_words) in classification_list.items():
-            excluded = False
-            for word in exclude_words:
-                word = " " + word + " "
-                if excluded:
-                    break
-                if word in description:
-                    excluded = True
-                    break
-            if not excluded:
-                for word in include_words:
-                    word = " " + word + " "
-                    if word in description:
-                        self.category = category
-                        return
-        self.category = ""
+        self.category = categorize_transaction(self.description)
         return
-
-
-if not classification_list:
-    read_classification()
