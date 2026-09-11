@@ -6,6 +6,15 @@ This finance tracker uses gmail API to access the bank emails and export their d
 
 [How to setup Gmail API](https://developers.google.com/gmail/api/quickstart/python)
 
+## Run
+
+From Windows File Explorer, double-click one of the root batch files:
+
+- `run_email_processor.bat` processes Gmail bank emails and exports the transactions.
+- `run_spreadsheet_processor.bat` asks for an `.xlsx` file and exports the normalized transactions.
+
+Both launchers create/use `.venv`, install `requirements.txt`, and run the selected script from the project root.
+
 ## Reference
 
 [Search operators you can use with Gmail](https://support.google.com/mail/answer/7190?hl=en)

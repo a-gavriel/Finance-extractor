@@ -5,10 +5,21 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python: Current File",
-      "type": "python",
+      "name": "Python: Email Processor",
+      "type": "debugpy",
       "request": "launch",
-      "program": "main.py",
+      "program": "${workspaceFolder}/src/email_processor.py",
+      "args": ["-g"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Python: Spreadsheet Processor",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/spreadsheet_processor.py",
+      "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "justMyCode": true
     }
