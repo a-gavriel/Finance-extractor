@@ -12,7 +12,7 @@ class BacProcessor(BaseBankProcessor):
         return "BAC"
 
     def identify(self, email: Email):
-        return "notificacionesbaccr" in email.sender.lower()
+        return "notificacionbac" in email.sender.lower()
 
     def process(self, email):
         if self._identify_transaction_type(email) == TransactionType.CARD_MOVEMENT:
